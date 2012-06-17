@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="activityMain">Projektaufgabe</string>
+    <string name="activityAdd">Ort hinzufügen</string>
+    <string name="activityDetail">Ort bearbeiten</string>
 
-    <string name="hello">Hello World, Projektaufgabe1Activity!</string>
+    <string name="hello">Hello, Projektaufgabe1</string>
     <string name="app_name">Projektaufgabe1</string>
-
+	<string name="add">Hinzufügen</string>
+	<string name="overview">Übersicht</string>
+	<string name="detail">Detail</string>
+	
+	<string name="name">Name</string>
+	<string name="location">Ort</string>
+	<string name="noSignal">Kein Signal</string>
+	<string name="save">Speichern</string>
 </resources>
