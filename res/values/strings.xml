@@ -4,7 +4,6 @@
     <string name="activityAdd">Ort hinzufügen</string>
     <string name="activityDetail">Ort bearbeiten</string>
 
-    <string name="hello">Hello, Projektaufgabe1</string>
     <string name="app_name">Projektaufgabe1</string>
 	<string name="add">Hinzufügen</string>
 	<string name="overview">Übersicht</string>
@@ -12,6 +11,10 @@
 	
 	<string name="name">Name</string>
 	<string name="location">Ort</string>
-	<string name="noSignal">Kein Signal</string>
+	<string name="longitude">Längengrad:</string>
+	<string name="latitude">Breitengrad:</string>
 	<string name="save">Speichern</string>
+	<string name="cancel">Abbrechen</string>
+	
+	<string name="noGpsSignal">Kein Gps Signal</string>
 </resources>

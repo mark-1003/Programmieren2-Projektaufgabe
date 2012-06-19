@@ -27,16 +27,35 @@
         android:text="@string/location" />
 
     <TextView
-        android:id="@+id/textLocationValue"
+        android:id="@+id/textLongitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/noSignal"
+        android:text="@string/longitude"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/buttonSave"
+    <TextView
+        android:id="@+id/textLatitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/save" />
+        android:text="@string/latitude"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
+
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="92dp"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel" />
+
+    </LinearLayout>
 
 </LinearLayout>
