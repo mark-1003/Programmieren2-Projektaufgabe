@@ -1,5 +1,6 @@
-package dhbw.i2011.programmieren.projektaufgabe1;
+package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
+import de.dhbw.stuttgart.horb.i11017.projektaufgabe1.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,23 +11,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
-public class LocationAddActivity extends Activity 
-{
+public class LocationDetailActivity extends Activity
+{	
 	private TextView textName;
 	private EditText editName;
 	private TextView textLocation;
 	private TextView textLongitude;
-	private TextView textLatitude;
+	private TextView textLatitude;	
 	private Button buttonSave;
 	private Button buttonCancel;
+	
+	private int locationId;
+	private String oldLocationName = "";
+	
+	private int returnValue = RESULT_CANCELED;
 	
 	/** Called when the activity is first created. 
 	 */
 	@Override
-	public void onCreate(Bundle savedInstanceState)
+	public void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.add);
+		setContentView(R.layout.detail);
 		
 		textName = (TextView) findViewById(R.id.textName);
 		editName = (EditText) findViewById(R.id.editName);
@@ -38,7 +44,8 @@ public class LocationAddActivity extends Activity
 		{
 			public void onClick(View v) 
 			{
-				// TODO return new location
+				// Save
+				returnValue = RESULT_OK;
 				finish();
 			}
 		});
@@ -47,30 +54,31 @@ public class LocationAddActivity extends Activity
 		{
 			public void onClick(View v) 
 			{
-				// TODO Auto-generated method stub
-				//finish();
+				// Cancel
+				returnValue = RESULT_CANCELED;
+				finish();
 			}
 		});
-		
-		Intent intent = getIntent();
-		
-		// read data from intent
-		Bundle extras = getIntent().getExtras();
-		if (extras == null) 
-		{
-			return;
-		}
-		String name = extras.getString("name");
-		double longitude = extras.getDouble("longitude");
-		double latitude = extras.getDouble("latitude");	 	
-				
-	 	// Daten in den Textfeldern anzeigen
-	 	if (name != null && latitude != 0.0 && longitude != 0.0) 
+
+	    // read data from intent
+	 	Bundle extras = getIntent().getExtras();
+	 	if (extras == null) 
 	 	{
-	 	 	editName.setText(name);
-	 	 	textLongitude.setText(String.valueOf(longitude));
-	 	 	textLatitude.setText(String.valueOf(latitude));
-	 	 }
+	 		return;
+	 	}
+	 	locationId = extras.getInt("id");
+	 	oldLocationName = extras.getString("name");
+	 	double longitude = extras.getDouble("longitude");
+	 	double latitude = extras.getDouble("latitude");
+		
+	 	
+	 	// Daten in den Textfeldern anzeigen
+		if (oldLocationName != null && longitude != 0.0 && latitude != 0.0)
+	 	{
+	 		editName.setText(oldLocationName);
+	 		textLongitude.setText( String.valueOf(longitude) );
+ 			textLatitude.setText( String.valueOf(latitude) );
+	 	}
 	}
 	
 	@Override
@@ -78,12 +86,11 @@ public class LocationAddActivity extends Activity
 	{
 		// Prepare data intent 
 		Intent data = new Intent();
-		data.putExtra("name", editName.getText().toString());
-		data.putExtra("longitude", textLongitude.getText().toString());
-		data.putExtra("latitude", textLatitude.getText().toString());
-		// Activity finished ok, return the data
-		setResult(RESULT_OK, data);
+		data.putExtra("id", locationId);
+		data.putExtra("oldName", oldLocationName);
+		data.putExtra("newName", editName.getText().toString());
+		// Activity finished, return the data
+		setResult(returnValue, data);
 		super.finish();
-	}
-	
+	}	
 }

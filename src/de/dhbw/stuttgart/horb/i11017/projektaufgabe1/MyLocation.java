@@ -1,4 +1,4 @@
-package dhbw.i2011.programmieren.projektaufgabe1;
+package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
 import android.location.Location;
 

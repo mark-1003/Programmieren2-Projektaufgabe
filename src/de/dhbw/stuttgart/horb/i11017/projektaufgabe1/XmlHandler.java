@@ -1,4 +1,4 @@
-package dhbw.i2011.programmieren.projektaufgabe1;
+package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xmlpull.v1.XmlSerializer;
 import android.content.Context;
 import android.location.Location;
-import android.os.Environment;
 import android.sax.Element;
 import android.sax.EndElementListener;
 import android.sax.RootElement;
@@ -27,7 +26,8 @@ import android.util.Xml;
  */
 public class XmlHandler extends DefaultHandler 
 {
-	private static final String _XMLFileName = "locations.xml";
+	private Context context;
+	private static final String m_XmlFileName = "locations.xml";
 	
 	private MyLocation myLocation;
 	private ArrayList<MyLocation> myLocations;
@@ -38,7 +38,8 @@ public class XmlHandler extends DefaultHandler
 	 */
 	public XmlHandler(Context context)
 	{
-	    myLocations = new ArrayList<MyLocation>();    
+	    myLocations = new ArrayList<MyLocation>();
+	    this.context = context;
 	}
 	
 	/**
@@ -47,7 +48,8 @@ public class XmlHandler extends DefaultHandler
 	public ArrayList<MyLocation> readLocations() throws FileNotFoundException
 	{
 		// open File
-		File xmlFile = new File(Environment.getExternalStorageDirectory(), _XMLFileName);
+		File xmlFile = new File(context.getFilesDir(), m_XmlFileName);
+		
 		FileInputStream fileInputStream = new FileInputStream(xmlFile);
 		
 		RootElement root = new RootElement("appdata");
@@ -57,8 +59,8 @@ public class XmlHandler extends DefaultHandler
 		{
 			public void start(Attributes attributes)
 			{
-				//Attribute: 0=name 1=longitude 2=latitude 3=accuracy
-				String name = attributes.getValue("name")/*.getValue(0)*/;
+				//Attribute: 0=name 1=longitude 2=latitude
+				String name = attributes.getValue(0);//.get.getValue("location")/*.getValue(0)*/;
 				Location location = new Location("");
 				location.setLongitude(Double.parseDouble(attributes.getValue("longitude")/*.getValue(1)*/));
 				location.setLatitude(Double.parseDouble(attributes.getValue("latitude")/*.getValue(2)*/));				
@@ -93,7 +95,7 @@ public class XmlHandler extends DefaultHandler
 	
 	public void saveLocations(ArrayList<MyLocation> myLocations)
 	{
-		File xmlFile = new File(Environment.getExternalStorageDirectory(), _XMLFileName);
+		File xmlFile = new File(context.getFilesDir(), m_XmlFileName);
 		try
 		{
 			xmlFile.createNewFile();
@@ -121,6 +123,22 @@ public class XmlHandler extends DefaultHandler
 			serializer.startTag(null, "appdata");
 			for (MyLocation myLocation : myLocations)
 			{
+				/*serializer.startTag(null, "location");
+				
+				serializer.startTag(null, "name");
+				serializer.text( myLocation.getName() );
+				serializer.endTag(null, "name");
+				
+				serializer.startTag(null, "longitude");
+				serializer.text( String.valueOf(myLocation.getLocation().getLongitude()) );
+				serializer.endTag(null, "longitude");
+				
+				serializer.startTag(null, "latitude");
+				serializer.text( String.valueOf(myLocation.getLocation().getLatitude()) );
+				serializer.endTag(null, "latitude");
+				
+				serializer.endTag(null, "location");*/
+				
 				serializer.startTag(null, "location");
 				//serializer.attribute(null, "id", String.valueOf(myLocation.getId()));
 				serializer.attribute(null, "name", myLocation.getName());

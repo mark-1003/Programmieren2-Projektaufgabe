@@ -10,11 +10,11 @@
         android:layout_height="wrap_content"
         android:onClick="onClick"
         android:text="@string/add" />
-
+
     <ListView
         android:id="@+id/locationList"
         android:layout_width="match_parent"
-        android:layout_height="434dp" >
+        android:layout_height="wrap_content" >
     </ListView>
 
 </LinearLayout>
