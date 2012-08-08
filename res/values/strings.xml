@@ -17,5 +17,5 @@
 	<string name="cancel">Abbrechen</string>
 	
 	<string name="noGpsSignal">Kein Gps Signal</string>
-	<string name="itemAlreadyExists">Dieser Ort existiert bereits!</string>
+	<string name="itemAlreadyExists">Dieser Ort existiert bereits!\nBitte verwenden Sie einen anderen Namen.</string>
 </resources>

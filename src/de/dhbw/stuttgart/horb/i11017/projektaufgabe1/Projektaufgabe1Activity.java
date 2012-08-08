@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import de.dhbw.stuttgart.horb.i11017.projektaufgabe1.R;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -45,9 +46,10 @@ public class Projektaufgabe1Activity<T> extends Activity
 	private Context m_context;
 	
 	// ArrayList for class MyLocation
+	private LocationXmlHelper m_locationXmlHelper;
 	private ArrayList<MyLocation> m_myLocations;
 	private HashMap<String, Integer> m_hmpLocationToId;
-	private LocationAdapter m_listAdapter;
+	private LocationAdapter m_listAdapter;	
 	
 	/**
 	 * Called when the activity is first created.
@@ -59,7 +61,10 @@ public class Projektaufgabe1Activity<T> extends Activity
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 		
+        
         m_context = this;
+        m_locationXmlHelper = new LocationXmlHelper(m_context);
+        
         
         // Initialize addButton
         m_addButton = (Button) findViewById(R.id.addLocation);
@@ -94,6 +99,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 			}
 		});
         
+        
         // Initialize locationList
         m_locationList = (ListView) findViewById(R.id.locationList);
         m_locationList.setOnItemClickListener(new OnItemClickListener()
@@ -117,14 +123,16 @@ public class Projektaufgabe1Activity<T> extends Activity
         	}
         });
         
+        
         // read Xml and set ArrayList to LocationAdapter
-        m_myLocations = getDataFromXml();
+        m_myLocations = m_locationXmlHelper.getDataFromXml();
         if ( m_myLocations == null )
         {
         	m_myLocations = new ArrayList<MyLocation>();
         }
         m_listAdapter = new LocationAdapter(this, m_myLocations);
         m_locationList.setAdapter(m_listAdapter);
+        
         
         // create HashMap for Name to Id search
         m_hmpLocationToId = new HashMap<String, Integer>();
@@ -134,6 +142,7 @@ public class Projektaufgabe1Activity<T> extends Activity
     		m_hmpLocationToId.put(m_myLocations.get(i).getName(), i);
     	}
         
+        
         // start locationListener
         // TODO: register all locations loaded from XML
      	m_locationListener = new MyLocationListener();
@@ -142,6 +151,15 @@ public class Projektaufgabe1Activity<T> extends Activity
      	// 60000 ms --> 1min
      	// 100 meter
      	m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 100, m_locationListener);
+     	
+     	for(MyLocation tmp : m_myLocations)
+     	{
+     		Intent intent = new Intent("");
+     		PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+     		/*m_locationManager.addProximityAlert(tmp.getLocation().getLatitude(), 
+     				tmp.getLocation().getLongitude(), 100, -1, intent);*/
+     	}
 	}
 	
 	private void updateListView()
@@ -179,13 +197,14 @@ public class Projektaufgabe1Activity<T> extends Activity
 				// check if name already exists
 				if ( m_hmpLocationToId.containsKey(name) )
 				{
-					Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_SHORT).show();
+					Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_LONG).show();
+					// TODO: open alert for better recognition
 				}
 				else
 				{
 					m_myLocations.add(new MyLocation(name, newLocation));
 					m_hmpLocationToId.put(name, m_myLocations.size()-1);
-					saveDataToXml(m_myLocations);
+					m_locationXmlHelper.saveDataToXml(m_myLocations);
 					updateListView();
 					
 					// TODO notify LocationManager --> new location added
@@ -226,7 +245,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 					m_myLocations.get(id).setName(newName);
 					m_hmpLocationToId.remove(oldName);
 					m_hmpLocationToId.put(newName, id);
-					saveDataToXml(m_myLocations);
+					m_locationXmlHelper.saveDataToXml(m_myLocations);
 					updateListView();
 					
 					// TODO notify LocationManager --> items name has changed
@@ -237,38 +256,6 @@ public class Projektaufgabe1Activity<T> extends Activity
 		{
 			
 		}
-	}
-	
-	/**
-	 * read data from Xml and return ArrayList<MyLocation>
-	 */
-	private ArrayList<MyLocation> getDataFromXml()
-	{
-		XmlHandler xml;
-		xml = new XmlHandler(getApplicationContext());
-		
-		try
-		{
-			return xml.readLocations();
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Save data from ArrayList<MyLocation> to Xml file
-	 * @param myLocations
-	 */
-	public void saveDataToXml(ArrayList<MyLocation> myLocations)
-	{
-		XmlHandler xml;
-		xml = new XmlHandler(getApplicationContext());
-		
-		xml.saveLocations(myLocations);
 	}
 	
 	
