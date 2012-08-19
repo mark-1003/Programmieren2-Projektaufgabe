@@ -5,8 +5,12 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="10" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" >
+    </permission>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -20,11 +24,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity 
-            android:name="LocationDetailActivity" android:label="@string/activityDetail">
-            
+        <activity
+            android:name="LocationDetailActivity"
+            android:label="@string/activityDetail" >
         </activity>
-        <activity android:name="de.dhbw.stuttgart.horb.i11017.projektaufgabe1.LocationAddActivity" android:label="@string/activityAdd"></activity>
+        <activity
+            android:name="de.dhbw.stuttgart.horb.i11017.projektaufgabe1.LocationAddActivity"
+            android:label="@string/activityAdd" >
+        </activity>
+
+        <receiver android:name="ProximityIntentReceiver" >
+            <intent filter="" >
+                <action android:name="de.dhbw.horb.proximityalert.ProximityAlert" />
+            </intent>
+        </receiver>
     </application>
 
 </manifest>

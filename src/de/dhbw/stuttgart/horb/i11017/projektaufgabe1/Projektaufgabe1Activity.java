@@ -1,6 +1,5 @@
 package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,6 +8,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -30,6 +30,15 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class Projektaufgabe1Activity<T> extends Activity
 {
+	private static final long MINIMUM_TIME_BETWEEN_UPDATE = 60000;	// in Milliseconds
+	private static final long MINIMUM_DISTANCECHANGE_FOR_UPDATE = 45;	// in Meters
+	
+	private static final long POINT_RADIUS = 50;	// in Meters
+	private static final long PROX_ALERT_EXPIRATION = -1;
+	
+	private static final String PROX_ALERT_INTENT = "de.dhbw.stuttgart.horb.i11017.projektaufgabe1";
+	
+	
 	// Request codes for intends
 	private static final int REQUEST_ADD = 10;
 	private static final int REQUEST_DETAIL = 11;
@@ -41,7 +50,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 	
 	// LocationManager
 	private LocationManager m_locationManager = null;
-	private MyLocationListener m_locationListener = null;
+	//private MyLocationListener m_locationListener = null;
 	
 	private Context m_context;
 	
@@ -134,38 +143,70 @@ public class Projektaufgabe1Activity<T> extends Activity
         m_locationList.setAdapter(m_listAdapter);
         
         
-        // create HashMap for Name to Id search
-        m_hmpLocationToId = new HashMap<String, Integer>();
-        for (int i = 0; i < m_myLocations.size(); i++)
-    	{
-    		// map locationName and index to hashMap
-    		m_hmpLocationToId.put(m_myLocations.get(i).getName(), i);
-    	}
+        m_hmpLocationToId = createHmpNameToId(m_myLocations);
         
-        
-        // start locationListener
-        // TODO: register all locations loaded from XML
-     	m_locationListener = new MyLocationListener();
-     	m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-     	// time/distance to get new location
-     	// 60000 ms --> 1min
-     	// 100 meter
-     	m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 100, m_locationListener);
+        startLocationListener();
      	
-     	for(MyLocation tmp : m_myLocations)
-     	{
-     		Intent intent = new Intent("");
-     		PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-
-     		/*m_locationManager.addProximityAlert(tmp.getLocation().getLatitude(), 
-     				tmp.getLocation().getLongitude(), 100, -1, intent);*/
-     	}
+     	registerAllLocations(m_myLocations);
 	}
 	
+	private HashMap<String, Integer> createHmpNameToId(ArrayList<MyLocation> locations)
+	{
+		// create HashMap for Name to Id search
+		HashMap<String, Integer> hmpLocationToId = new HashMap<String, Integer>();
+        for (int i = 0; i < locations.size(); i++)
+    	{
+    		// map locationName and index to hashMap
+    		hmpLocationToId.put(locations.get(i).getName(), i);
+    	}
+        return hmpLocationToId;
+	}
+	
+	private void startLocationListener()
+	{
+		// start locationListener
+     	m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+     	m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+     			MINIMUM_TIME_BETWEEN_UPDATE, MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+     			new MyLocationListener());
+	}
+	
+	private void registerAllLocations(ArrayList<MyLocation> myLocations)
+	{
+		if ( myLocations != null )
+		{
+			// register all locations loaded from XML
+	     	// TODO: do the same, when a new location is added or something is changed
+			for(MyLocation tmp : m_myLocations)
+	     	{
+	     		registerLocation(tmp);
+	     	}
+		}
+		
+	}
+	
+	private void registerLocation(MyLocation myLocation)
+	{
+		if ( m_locationManager != null && myLocation != null )
+		{
+			Intent intent = new Intent(PROX_ALERT_INTENT + "." + myLocation.getName());
+     		PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+     		m_locationManager.addProximityAlert(myLocation.getLocation().getLatitude(),
+     				myLocation.getLocation().getLongitude(),
+     				POINT_RADIUS,
+     				PROX_ALERT_EXPIRATION,
+     				proximityIntent);
+     		
+     		IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT + "." + myLocation.getName());
+     		registerReceiver(new ProximityIntentReceiver(myLocation), filter);
+		}
+		
+	}
+
 	private void updateListView()
 	{
 		// update listAdapter
-        if ( m_myLocations != null )
+		if ( m_myLocations != null )
         {
         	m_listAdapter.notifyDataSetChanged();
         }
@@ -178,78 +219,24 @@ public class Projektaufgabe1Activity<T> extends Activity
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{
 		if ( (resultCode == RESULT_OK) && (requestCode == REQUEST_ADD) )
-		{
-			String name = "";
-			Location newLocation = new Location("");
+		{			
 			// read name, longitude and latitude from Intent
 			if ( data.hasExtra("name") && data.hasExtra("longitude") && data.hasExtra("latitude") )
 			{
-				name = data.getExtras().getString("name");
-				newLocation.setLongitude( Double.valueOf(data.getExtras().getString("longitude")) );
-				newLocation.setLatitude( Double.valueOf( data.getExtras().getString("latitude")) );
-				
-				// if ArrayList is null, create it
-				if ( m_myLocations == null )
-				{
-					m_myLocations = new ArrayList<MyLocation>();
-				}
-				
-				// check if name already exists
-				if ( m_hmpLocationToId.containsKey(name) )
-				{
-					Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_LONG).show();
-					// TODO: open alert for better recognition
-				}
-				else
-				{
-					m_myLocations.add(new MyLocation(name, newLocation));
-					m_hmpLocationToId.put(name, m_myLocations.size()-1);
-					m_locationXmlHelper.saveDataToXml(m_myLocations);
-					updateListView();
-					
-					// TODO notify LocationManager --> new location added
-				}
+				activityAddReturned( data.getExtras().getString("name"),
+										Double.valueOf(data.getExtras().getString("longitude")),
+										Double.valueOf( data.getExtras().getString("latitude")) );
 			}
 		}
 		else if ( (resultCode == RESULT_OK) && (requestCode == REQUEST_DETAIL) )		
 		{
-			Integer id;
-			String oldName = "";
-			String newName = "";
 			// read name, longitude and latitude from Intent
 			if ( data.hasExtra("id") && data.hasExtra("oldName") && data.hasExtra("newName") )
 			{
-				id = data.getExtras().getInt("id");
-				oldName = data.getExtras().getString("oldName");
-				newName = data.getExtras().getString("newName");
+				activityDetailReturned( data.getExtras().getInt("id"),
+										data.getExtras().getString("oldName"),
+										data.getExtras().getString("newName") );
 				
-				// if ArrayList is null, create it
-				if ( m_myLocations == null )
-				{
-					m_myLocations = new ArrayList<MyLocation>();
-				}
-				
-				// check if new name already exists
-				if ( newName.equals(oldName) )
-				{
-					// do nothing
-				}
-				// check if any item got the same name already
-				else if ( m_hmpLocationToId.containsKey(newName) && (m_hmpLocationToId.get(newName) != id) )
-				{
-					Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_SHORT).show();
-				}
-				// change items name
-				else
-				{
-					m_myLocations.get(id).setName(newName);
-					m_hmpLocationToId.remove(oldName);
-					m_hmpLocationToId.put(newName, id);
-					m_locationXmlHelper.saveDataToXml(m_myLocations);
-					updateListView();
-					
-					// TODO notify LocationManager --> items name has changed
-				}
 			}
 		}
 		else if ( resultCode == RESULT_CANCELED )
@@ -258,6 +245,68 @@ public class Projektaufgabe1Activity<T> extends Activity
 		}
 	}
 	
+	private void activityAddReturned(String name, double longitude, double latitude)
+	{
+		Location newLocation = new Location("");
+		newLocation.setLongitude(longitude);
+		newLocation.setLatitude(latitude);
+		
+		// if ArrayList is null, create it
+		if ( m_myLocations == null )
+		{
+			m_myLocations = new ArrayList<MyLocation>();
+		}
+		
+		// check if name already exists
+		if ( m_hmpLocationToId.containsKey(name) )
+		{
+			Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_LONG).show();
+			// TODO: open alert for better recognition
+		}
+		else
+		{
+			MyLocation tmp = new MyLocation(name, newLocation);
+			m_myLocations.add(tmp);
+			m_hmpLocationToId.put(name, m_myLocations.size()-1);
+			m_locationXmlHelper.saveDataToXml(m_myLocations);
+			updateListView();
+			
+			// notify LocationManager --> new location added
+			registerLocation(tmp);
+		}
+	}
+	
+	private void activityDetailReturned(int id, String oldName, String newName)
+	{
+		// if ArrayList is null, create it
+		if ( m_myLocations == null )
+		{
+			m_myLocations = new ArrayList<MyLocation>();
+		}
+		
+		// check if new name already exists
+		if ( newName.equals(oldName) )
+		{
+			// do nothing
+		}
+		// check if any item got the same name already
+		else if ( m_hmpLocationToId.containsKey(newName) && (m_hmpLocationToId.get(newName) != id) )
+		{
+			Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_SHORT).show();
+		}
+		// change items name
+		else
+		{
+			m_myLocations.get(id).setName(newName);
+			m_hmpLocationToId.remove(oldName);
+			m_hmpLocationToId.put(newName, id);
+			m_locationXmlHelper.saveDataToXml(m_myLocations);
+			updateListView();
+			
+			// notify LocationManager --> items name has changed
+			// Done --> ProximityIntentReceiver owns a reference to myLocation
+		}
+	}
 	
 	/**
 	 * 
@@ -272,6 +321,9 @@ public class Projektaufgabe1Activity<T> extends Activity
 			// TODO Auto-generated method stub
 			//double latitude = location.getLatitude();
 			//double longitude = location.getLongitude();
+			//Location pointLocation = retrievelocationFromPreferences();
+			//float distance = location.distanceTo(pointLocation);
+			//Toast.makeText(Projektaufgabe1Activity.this, "Distance from Point:"+distance, Toast.LENGTH_LONG).show();
 		}
 
 		public void onStatusChanged(String provider, int status, Bundle extras) 
