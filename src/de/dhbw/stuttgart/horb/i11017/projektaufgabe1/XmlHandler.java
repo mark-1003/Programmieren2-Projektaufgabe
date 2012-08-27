@@ -59,12 +59,19 @@ public class XmlHandler extends DefaultHandler
 		{
 			public void start(Attributes attributes)
 			{
-				//Attribute: 0=name 1=longitude 2=latitude
-				String name = attributes.getValue(0);//.get.getValue("location")/*.getValue(0)*/;
+				//Attribute: 0=id 1=name 2=longitude 3=latitude
+				int id = Integer.parseInt(attributes.getValue("id"));
+				String name = attributes.getValue("name");
 				Location location = new Location("");
-				location.setLongitude(Double.parseDouble(attributes.getValue("longitude")/*.getValue(1)*/));
-				location.setLatitude(Double.parseDouble(attributes.getValue("latitude")/*.getValue(2)*/));				
-				myLocation = new MyLocation(name, location);
+				location.setLongitude(Double.parseDouble(attributes.getValue("longitude")));
+				location.setLatitude(Double.parseDouble(attributes.getValue("latitude")));
+				int showMessage = Integer.parseInt(attributes.getValue("showMessage"));
+				String message = attributes.getValue("message");
+				int mute = Integer.parseInt(attributes.getValue("mute"));
+				myLocation = new MyLocation(id, name, location);
+				myLocation.setShowMessage(showMessage);
+				myLocation.setMessage(message);
+				myLocation.setMute(mute);
 			}
 		});
 		
@@ -140,10 +147,15 @@ public class XmlHandler extends DefaultHandler
 				serializer.endTag(null, "location");*/
 				
 				serializer.startTag(null, "location");
-				//serializer.attribute(null, "id", String.valueOf(myLocation.getId()));
+				
+				serializer.attribute(null, "id", String.valueOf(myLocation.getId()));
 				serializer.attribute(null, "name", myLocation.getName());
 				serializer.attribute(null, "longitude", String.valueOf(myLocation.getLocation().getLongitude()));
-				serializer.attribute(null, "latitude", String.valueOf(myLocation.getLocation().getLatitude()));				
+				serializer.attribute(null, "latitude", String.valueOf(myLocation.getLocation().getLatitude()));	
+				serializer.attribute(null, "showMessage", String.valueOf(myLocation.getShowMessage()));
+				serializer.attribute(null, "message", myLocation.getMessage());
+				serializer.attribute(null, "mute", String.valueOf(myLocation.getMute()));
+
 				serializer.endTag(null, "location");
 			}
 			serializer.endTag(null, "appdata");

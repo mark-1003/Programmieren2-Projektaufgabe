@@ -18,30 +18,32 @@
 
         <requestFocus />
     </EditText>
-
+
     <TextView
         android:id="@+id/textLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
         android:text="@string/location" />
-
+
     <TextView
         android:id="@+id/textLongitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/longitude"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
+
     <TextView
         android:id="@+id/textLatitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/latitude"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp" >
 
         <Button
             android:id="@+id/buttonSave"

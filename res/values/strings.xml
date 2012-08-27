@@ -10,11 +10,15 @@
 	<string name="detail">Detail</string>
 	
 	<string name="name">Name</string>
-	<string name="location">Ort</string>
+	<string name="location">Koordinaten</string>
 	<string name="longitude">Längengrad:</string>
 	<string name="latitude">Breitengrad:</string>
 	<string name="save">Speichern</string>
 	<string name="cancel">Abbrechen</string>
+	<string name="preferences">Einstellungen</string>
+	<string name="message">Benachrichtigung</string>
+	<string name="mute">Lautlos</string>
+	<string name="standardMessage">Benutzerdefinierte Nachricht</string>
 	
 	<string name="noGpsSignal">Kein Gps Signal</string>
 	<string name="itemAlreadyExists">Dieser Ort existiert bereits!\nBitte verwenden Sie einen anderen Namen.</string>

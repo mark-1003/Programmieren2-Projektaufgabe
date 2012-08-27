@@ -21,6 +21,10 @@ public class LocationAddActivity extends Activity
 	private Button buttonSave;
 	private Button buttonCancel;
 	
+	String name = "";
+	double longitude = 0.0;
+	double latitude = 0.0;
+	
 	private int returnValue = RESULT_CANCELED;
 	
 	/** Called when the activity is first created. 
@@ -36,6 +40,9 @@ public class LocationAddActivity extends Activity
 		textLocation = (TextView) findViewById(R.id.textLocation);
 		textLongitude = (TextView) findViewById(R.id.textLongitude);
 		textLatitude = (TextView) findViewById(R.id.textLatitude);
+		
+		
+		
 		buttonSave = (Button) findViewById(R.id.buttonSave);
 		buttonSave.setOnClickListener(new OnClickListener()
 		{
@@ -63,16 +70,16 @@ public class LocationAddActivity extends Activity
 		{
 			return;
 		}
-		String name = extras.getString("name");
-		double longitude = extras.getDouble("longitude");
-		double latitude = extras.getDouble("latitude");	 	
+		name = extras.getString("name");
+		longitude = extras.getDouble("longitude");
+		latitude = extras.getDouble("latitude");	 	
 				
-	 	// Daten in den Textfeldern anzeigen
+	 	// show data in textfields
 	 	if (name != null && latitude != 0.0 && longitude != 0.0)
 	 	{
 	 	 	editName.setText(name);
-	 	 	textLongitude.setText(String.valueOf(longitude));
-	 	 	textLatitude.setText(String.valueOf(latitude));
+	 	 	textLongitude.setText(getString(R.string.longitude) +" " + String.valueOf(longitude));
+	 	 	textLatitude.setText(getString(R.string.latitude) +" " + String.valueOf(latitude));
 	 	 }
 	}
 	
@@ -82,10 +89,10 @@ public class LocationAddActivity extends Activity
 		// Prepare data intent 
 		Intent data = new Intent();
 		data.putExtra("name", editName.getText().toString());
-		data.putExtra("longitude", textLongitude.getText().toString());
-		data.putExtra("latitude", textLatitude.getText().toString());
+		data.putExtra("longitude", longitude);
+		data.putExtra("latitude", latitude);
 		// Activity finished, return the data
 		setResult(returnValue, data);
 		super.finish();
-	}	
+	}
 }

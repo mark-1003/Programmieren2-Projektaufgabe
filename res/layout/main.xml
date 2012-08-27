@@ -4,17 +4,32 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/addLocation"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClick"
-        android:text="@string/add" />
-
+        android:baselineAligned="true" >
+
+        <Button
+            android:id="@+id/addLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="@string/add" />
+
+        <Button
+            android:id="@+id/preferences"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/preferences" />
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/locationList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
+
     </ListView>
 
 </LinearLayout>
