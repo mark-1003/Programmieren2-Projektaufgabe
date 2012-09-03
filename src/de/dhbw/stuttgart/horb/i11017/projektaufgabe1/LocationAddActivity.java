@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 public class LocationAddActivity extends Activity 
 {
-	private TextView textName;
+	//private TextView textName;
 	private EditText editName;
-	private TextView textLocation;
+	//private TextView textLocation;
 	private TextView textLongitude;
 	private TextView textLatitude;
 	private Button buttonSave;
@@ -35,9 +35,9 @@ public class LocationAddActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.add);
 		
-		textName = (TextView) findViewById(R.id.textName);
+		//textName = (TextView) findViewById(R.id.textName);
 		editName = (EditText) findViewById(R.id.editName);
-		textLocation = (TextView) findViewById(R.id.textLocation);
+		//textLocation = (TextView) findViewById(R.id.textLocation);
 		textLongitude = (TextView) findViewById(R.id.textLongitude);
 		textLatitude = (TextView) findViewById(R.id.textLatitude);
 		

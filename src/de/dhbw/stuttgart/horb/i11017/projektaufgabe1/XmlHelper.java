@@ -1,18 +1,14 @@
 package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 
 
-public class LocationXmlHelper
+public class XmlHelper
 {
 	Context context;
 	
-	public LocationXmlHelper(Context context)
+	public XmlHelper(Context context)
 	{
 		this.context = context;
 	}
@@ -21,14 +17,14 @@ public class LocationXmlHelper
 	 * read data from Xml and return ArrayList<MyLocation>
 	 * @param context
 	 */
-	public ArrayList<MyLocation> getDataFromXml()
+	public XmlDataContainer getDataFromXml()
 	{
 		XmlHandler xml;
 		xml = new XmlHandler(context);
 		
 		try
 		{
-			return xml.readLocations();
+			return xml.read();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -42,12 +38,12 @@ public class LocationXmlHelper
 	 * save data from ArrayList<MyLocation> to Xml
 	 * @param myLocations
 	 */
-	public void saveDataToXml(ArrayList<MyLocation> myLocations)
+	public void saveDataToXml(XmlDataContainer data)
 	{
 		XmlHandler xml;
 		xml = new XmlHandler(context);
 		
-		xml.saveLocations(myLocations);
+		xml.save(data);
 	}
 }
 

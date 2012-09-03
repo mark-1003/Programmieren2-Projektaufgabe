@@ -31,6 +31,7 @@ public class XmlHandler extends DefaultHandler
 	
 	private MyLocation myLocation;
 	private ArrayList<MyLocation> myLocations;
+	private XmlDataContainer data;
 	
 	/**
 	 * constructor
@@ -39,13 +40,15 @@ public class XmlHandler extends DefaultHandler
 	public XmlHandler(Context context)
 	{
 	    myLocations = new ArrayList<MyLocation>();
+	    data = new XmlDataContainer();
+	    data.m_myLocations = myLocations;
 	    this.context = context;
 	}
 	
 	/**
 	 * read all locations from XML file
 	 */
-	public ArrayList<MyLocation> readLocations() throws FileNotFoundException
+	public XmlDataContainer/*ArrayList<MyLocation>*/ read() throws FileNotFoundException
 	{
 		// open File
 		File xmlFile = new File(context.getFilesDir(), m_XmlFileName);
@@ -53,7 +56,18 @@ public class XmlHandler extends DefaultHandler
 		FileInputStream fileInputStream = new FileInputStream(xmlFile);
 		
 		RootElement root = new RootElement("appdata");
+		Element globalPreferences = root.getChild("globalPreferences");
 		Element location = root.getChild("location");
+		
+		globalPreferences.setStartElementListener(new StartElementListener()
+		{
+			public void start(Attributes attributes)
+			{
+				data.minTimeBetweenUpdate = Integer.parseInt(attributes.getValue("minimumTimeBetweenUpdate"));
+				data.minDistancechangeForUpdate = Integer.parseInt(attributes.getValue("minimumDistancechangeForUpdate"));
+				data.proxAlertRadius = Integer.parseInt(attributes.getValue("proximityAlertRadius"));
+			}
+		});
 		
 		location.setStartElementListener(new StartElementListener()
 		{
@@ -87,7 +101,7 @@ public class XmlHandler extends DefaultHandler
 		try
 		{
 			Xml.parse(fileInputStream, Xml.Encoding.UTF_8, root.getContentHandler());
-			return myLocations;
+			return data;
 		}
 		catch (SAXException e)
 		{
@@ -100,7 +114,7 @@ public class XmlHandler extends DefaultHandler
 		return null;
 	}
 	
-	public void saveLocations(ArrayList<MyLocation> myLocations)
+	public void save(XmlDataContainer data/*ArrayList<MyLocation> myLocations*/)
 	{
 		File xmlFile = new File(context.getFilesDir(), m_XmlFileName);
 		try
@@ -128,26 +142,16 @@ public class XmlHandler extends DefaultHandler
 			serializer.startDocument(null, true);
 			serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 			serializer.startTag(null, "appdata");
-			for (MyLocation myLocation : myLocations)
+			
+			serializer.startTag(null, "globalPreferences");
+			serializer.attribute(null, "minimumTimeBetweenUpdate", String.valueOf(data.minTimeBetweenUpdate));
+			serializer.attribute(null, "minimumDistancechangeForUpdate", String.valueOf(data.minDistancechangeForUpdate));
+			serializer.attribute(null, "proximityAlertRadius", String.valueOf(data.proxAlertRadius));
+			serializer.endTag(null, "globalPreferences");
+			
+			for (MyLocation myLocation : data.m_myLocations)
 			{
-				/*serializer.startTag(null, "location");
-				
-				serializer.startTag(null, "name");
-				serializer.text( myLocation.getName() );
-				serializer.endTag(null, "name");
-				
-				serializer.startTag(null, "longitude");
-				serializer.text( String.valueOf(myLocation.getLocation().getLongitude()) );
-				serializer.endTag(null, "longitude");
-				
-				serializer.startTag(null, "latitude");
-				serializer.text( String.valueOf(myLocation.getLocation().getLatitude()) );
-				serializer.endTag(null, "latitude");
-				
-				serializer.endTag(null, "location");*/
-				
 				serializer.startTag(null, "location");
-				
 				serializer.attribute(null, "id", String.valueOf(myLocation.getId()));
 				serializer.attribute(null, "name", myLocation.getName());
 				serializer.attribute(null, "longitude", String.valueOf(myLocation.getLocation().getLongitude()));
@@ -155,7 +159,6 @@ public class XmlHandler extends DefaultHandler
 				serializer.attribute(null, "showMessage", String.valueOf(myLocation.getShowMessage()));
 				serializer.attribute(null, "message", myLocation.getMessage());
 				serializer.attribute(null, "mute", String.valueOf(myLocation.getMute()));
-
 				serializer.endTag(null, "location");
 			}
 			serializer.endTag(null, "appdata");

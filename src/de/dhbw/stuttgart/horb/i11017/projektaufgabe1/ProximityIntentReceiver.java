@@ -1,12 +1,8 @@
 package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -14,8 +10,6 @@ import android.widget.Toast;
 
 public class ProximityIntentReceiver extends BroadcastReceiver 
 {
-	private static final int NOTIFICATION_ID = 1000;
-	
 	private int prevRingerMode = -1;
 	
 	private MyLocation myLocation = null;

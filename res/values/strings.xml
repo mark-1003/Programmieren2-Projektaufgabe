@@ -3,11 +3,13 @@
     <string name="activityMain">Projektaufgabe</string>
     <string name="activityAdd">Ort hinzufügen</string>
     <string name="activityDetail">Ort bearbeiten</string>
+    <string name="activityPreferences">Einstellungen</string>
 
     <string name="app_name">Projektaufgabe1</string>
 	<string name="add">Hinzufügen</string>
 	<string name="overview">Übersicht</string>
 	<string name="detail">Detail</string>
+	<string name="exit">Beenden</string>
 	
 	<string name="name">Name</string>
 	<string name="location">Koordinaten</string>
@@ -19,6 +21,10 @@
 	<string name="message">Benachrichtigung</string>
 	<string name="mute">Lautlos</string>
 	<string name="standardMessage">Benutzerdefinierte Nachricht</string>
+	
+	<string name="minTimeBetweenUpdate">Häufigkeit der gewünschten GPS Updates (msek)</string>
+	<string name="minDistancechangeForUpdate">Minimale Distanz für ein GPS Update (m)</string>
+	<string name="proxAlertRadius">Radius für ProximityAlerts (m)</string>
 	
 	<string name="noGpsSignal">Kein Gps Signal</string>
 	<string name="itemAlreadyExists">Dieser Ort existiert bereits!\nBitte verwenden Sie einen anderen Namen.</string>

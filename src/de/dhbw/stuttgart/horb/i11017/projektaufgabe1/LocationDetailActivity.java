@@ -15,12 +15,12 @@ import android.widget.TextView;
 
 public class LocationDetailActivity extends Activity
 {	
-	private TextView textName;
+	//private TextView textName;
 	private EditText editName;
-	private TextView textLocation;
+	//private TextView textLocation;
 	private TextView textLongitude;
 	private TextView textLatitude;	
-	private TextView textPreferences;
+	//private TextView textPreferences;
 	private CheckBox cbShowMessage;
 	private EditText editMessage;
 	private CheckBox cbMute;
@@ -45,12 +45,12 @@ public class LocationDetailActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.detail);
 		
-		textName = (TextView) findViewById(R.id.textName);
+		//textName = (TextView) findViewById(R.id.textName);
 		editName = (EditText) findViewById(R.id.editName);
-		textLocation = (TextView) findViewById(R.id.textLocation);
+		//textLocation = (TextView) findViewById(R.id.textLocation);
 		textLongitude = (TextView) findViewById(R.id.textLongitude);
 		textLatitude = (TextView) findViewById(R.id.textLatitude);
-		textPreferences = (TextView) findViewById(R.id.textPreferences);
+		//textPreferences = (TextView) findViewById(R.id.textPreferences);
 		cbShowMessage = (CheckBox) findViewById(R.id.cbShowMessage);
 		cbShowMessage.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
 		{
@@ -115,12 +115,12 @@ public class LocationDetailActivity extends Activity
 	 	oldLocationName = extras.getString("name");
 	 	longitude = extras.getDouble("longitude");
 	 	latitude = extras.getDouble("latitude");
-	 	int showMessage = extras.getInt("showMessage");
-	 	String message = extras.getString("message");
-	 	int mute = extras.getInt("mute");
+	 	showMessage = extras.getInt("showMessage");
+	 	message = extras.getString("message");
+	 	mute = extras.getInt("mute");
 		
 	 	
-	 	// Daten in den Textfeldern anzeigen
+	 	// show data in textFields
 		if (oldLocationName != null && longitude != 0.0 && latitude != 0.0
 				&& message != null )
 	 	{

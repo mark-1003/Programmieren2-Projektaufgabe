@@ -38,6 +38,7 @@
                 <action android:name="de.dhbw.horb.proximityalert.ProximityAlert" />
             </intent>
         </receiver>
+        <activity android:name="PreferencesActivity" android:label="@string/activityPreferences"></activity>
     </application>
 
 </manifest>

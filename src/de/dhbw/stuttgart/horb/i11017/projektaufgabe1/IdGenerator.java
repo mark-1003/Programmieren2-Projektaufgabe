@@ -2,6 +2,7 @@ package de.dhbw.stuttgart.horb.i11017.projektaufgabe1;
 
 import java.util.UUID;
 
+// create unique id's
 public class IdGenerator
 {
 	public static int generateUniqueId()

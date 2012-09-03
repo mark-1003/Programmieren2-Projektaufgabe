@@ -29,24 +29,19 @@ import android.widget.AdapterView.OnItemClickListener;
  * @param <T>
  */
 public class Projektaufgabe1Activity<T> extends Activity
-{
-	private static final long MINIMUM_TIME_BETWEEN_UPDATE = 60000;	// in Milliseconds
-	private static final long MINIMUM_DISTANCECHANGE_FOR_UPDATE = 45;	// in Meters
-	
-	private static final long POINT_RADIUS = 50;	// in Meters
-	private static final long PROX_ALERT_EXPIRATION = -1;
-	
+{	
+	private static final long PROX_ALERT_EXPIRATION = -1;	
 	private static final String PROX_ALERT_INTENT = "de.dhbw.stuttgart.horb.i11017.projektaufgabe1";
-	
 	
 	// Request codes for intends
 	private static final int REQUEST_ADD = 10;
 	private static final int REQUEST_DETAIL = 11;
-	
+	private static final int REQUEST_PREFERENCES = 12;
 	
 	// Controls
 	private Button m_addButton;
 	private Button m_preferencesButton;
+	private Button m_exitButton;
 	private ListView m_locationList;
 	
 	// LocationManager
@@ -56,12 +51,14 @@ public class Projektaufgabe1Activity<T> extends Activity
 	private Context m_context;
 	
 	// ArrayList for class MyLocation
-	private LocationXmlHelper m_locationXmlHelper;
-	private ArrayList<MyLocation> m_myLocations;
+	private XmlHelper m_XmlHelper;
+	//private ArrayList<MyLocation> data.m_myLocations;
+	private XmlDataContainer data;
 	private HashMap<Integer, Integer> m_hmpUIDtoLoc;
 	private LocationAdapter m_listAdapter;
 	
 	private ArrayList<PendingIntent> m_pendingIntents;
+	private ArrayList<ProximityIntentReceiver> m_proxIntentReceivers;
 	
 	/**
 	 * Called when the activity is first created.
@@ -75,7 +72,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 		
         
         m_context = this;
-        m_locationXmlHelper = new LocationXmlHelper(m_context);
+        m_XmlHelper = new XmlHelper(m_context);
         
         
         // Initialize addButton
@@ -114,12 +111,28 @@ public class Projektaufgabe1Activity<T> extends Activity
         {
 			public void onClick(View v)
 			{
-				// TODO: open preferences activity
+				Intent intent = new Intent(Projektaufgabe1Activity.this, PreferencesActivity.class);
 				
+				intent.putExtra("minTimeBetweenUpdate", data.minTimeBetweenUpdate);
+				intent.putExtra("minDistancechangeForUpdate", data.minDistancechangeForUpdate);
+				intent.putExtra("proxAlertRadius", data.proxAlertRadius);
+				
+				startActivityForResult(intent, REQUEST_PREFERENCES);
 			}
         	
         });
         
+     // Initialize exitButton
+        m_exitButton = (Button) findViewById(R.id.exit);
+        m_exitButton.setOnClickListener(new OnClickListener()
+        {
+			public void onClick(View v)
+			{
+				finish();
+				//System.exit(0);
+			}
+        	
+        });
         
         // Initialize locationList
         m_locationList = (ListView) findViewById(R.id.locationList);
@@ -149,21 +162,23 @@ public class Projektaufgabe1Activity<T> extends Activity
         
         
         // read Xml and set ArrayList to LocationAdapter
-        m_myLocations = m_locationXmlHelper.getDataFromXml();
-        if ( m_myLocations == null )
+        data = m_XmlHelper.getDataFromXml();
+        if ( data == null )
         {
-        	m_myLocations = new ArrayList<MyLocation>();
+        	data = new XmlDataContainer();
+        	data.m_myLocations = new ArrayList<MyLocation>();
         }
-        m_listAdapter = new LocationAdapter(this, m_myLocations);
+        m_listAdapter = new LocationAdapter(this, data.m_myLocations);
         m_locationList.setAdapter(m_listAdapter);
         
-        m_pendingIntents = new ArrayList<PendingIntent>();        
+        m_pendingIntents = new ArrayList<PendingIntent>();
+        m_proxIntentReceivers = new ArrayList<ProximityIntentReceiver>();
         
-        m_hmpUIDtoLoc = createHmpUIDtoLoc(m_myLocations);
+        m_hmpUIDtoLoc = createHmpUIDtoLoc(data.m_myLocations);
         
         startLocationListener();
      	
-     	registerAllLocations(m_myLocations);
+     	registerAllLocations(data.m_myLocations);
 	}
 	
 	public void onStart()
@@ -201,8 +216,8 @@ public class Projektaufgabe1Activity<T> extends Activity
      	m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
      	m_locationListener = new MyLocationListener();
      	m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-     			MINIMUM_TIME_BETWEEN_UPDATE,
-     			MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+     			data.minTimeBetweenUpdate,
+     			data.minDistancechangeForUpdate,
      			m_locationListener);
 	}
 	
@@ -211,7 +226,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 		if ( myLocations != null )
 		{
 			// register all locations loaded from XML
-			for(MyLocation tmp : m_myLocations)
+			for(MyLocation tmp : data.m_myLocations)
 	     	{
 	     		registerLocation(tmp);
 	     	}
@@ -223,21 +238,23 @@ public class Projektaufgabe1Activity<T> extends Activity
 	{
 		if ( m_locationManager != null && myLocation != null )
 		{
-			// TODO: check if location is already registred
 			Intent intent = new Intent(PROX_ALERT_INTENT + "." + myLocation.getId());
+			intent.putExtra("id", myLocation.getId());
 			
-     		PendingIntent proximityIntent = PendingIntent.getBroadcast(this, myLocation.getId(), intent, 0);	// TODO: param2: unique ID!
+     		PendingIntent proximityIntent = PendingIntent.getBroadcast(this, myLocation.getId(), intent, 0);
      		
      		m_locationManager.addProximityAlert(myLocation.getLocation().getLatitude(),
      											myLocation.getLocation().getLongitude(),
-     											POINT_RADIUS,
+     											data.proxAlertRadius,
      											PROX_ALERT_EXPIRATION,
      											proximityIntent);
      		
      		m_pendingIntents.add(proximityIntent);
      		
      		IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT + "." + myLocation.getId());
-     		registerReceiver(new ProximityIntentReceiver(myLocation), filter);
+     		ProximityIntentReceiver tmpReceiver = new ProximityIntentReceiver(myLocation);
+     		m_proxIntentReceivers.add(tmpReceiver);
+     		registerReceiver(tmpReceiver, filter);
 		}
 		
 	}
@@ -248,26 +265,30 @@ public class Projektaufgabe1Activity<T> extends Activity
 		{
 			m_locationManager.removeProximityAlert(tmp);
 		}
+		
+		for(ProximityIntentReceiver tmpReceiver : m_proxIntentReceivers)
+		{
+     		unregisterReceiver(tmpReceiver);
+		}
 	}
 
 	private void updateListView()
 	{
 		// update listAdapter
-		if ( m_myLocations != null )
+		if ( data.m_myLocations != null )
         {
         	m_listAdapter.notifyDataSetChanged();
         }
 	}
 	
 	/**
-	 * 
+	 * when add, detail or preferences activity gets finished
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{
 		if ( (resultCode == RESULT_OK) && (requestCode == REQUEST_ADD) )
-		{			
-			// read name, longitude and latitude from Intent
+		{
 			if ( data.hasExtra("name") && data.hasExtra("longitude") && data.hasExtra("latitude") )
 			{
 				activityAddReturned( data.getExtras().getString("name"),
@@ -277,7 +298,6 @@ public class Projektaufgabe1Activity<T> extends Activity
 		}
 		else if ( (resultCode == RESULT_OK) && (requestCode == REQUEST_DETAIL) )		
 		{
-			// read name, longitude and latitude from Intent
 			if ( data.hasExtra("id") && data.hasExtra("oldName") && data.hasExtra("newName")
 					&& data.hasExtra("showMessage") && data.hasExtra("message") && data.hasExtra("mute") )
 			{
@@ -287,7 +307,15 @@ public class Projektaufgabe1Activity<T> extends Activity
 										data.getExtras().getInt("showMessage"),
 										data.getExtras().getString("message"),
 										data.getExtras().getInt("mute") );
-				
+			}
+		}
+		else if ( (resultCode == RESULT_OK) && (requestCode == REQUEST_PREFERENCES) )
+		{
+			if ( data.hasExtra("minTimeBetweenUpdate") && data.hasExtra("minDistancechangeForUpdate") && data.hasExtra("proxAlertRadius") )
+			{
+				activityPreferencesReturned( data.getExtras().getInt("minTimeBetweenUpdate"),
+										data.getExtras().getInt("minDistancechangeForUpdate"),
+										data.getExtras().getInt("proxAlertRadius") );
 			}
 		}
 		else if ( resultCode == RESULT_CANCELED )
@@ -296,6 +324,7 @@ public class Projektaufgabe1Activity<T> extends Activity
 		}
 	}
 	
+	// when add activity gets finished
 	private void activityAddReturned(String name, double longitude, double latitude)
 	{
 		Location newLocation = new Location("");
@@ -303,46 +332,52 @@ public class Projektaufgabe1Activity<T> extends Activity
 		newLocation.setLatitude(latitude);
 		
 		// if ArrayList is null, create it
-		if ( m_myLocations == null )
+		if ( data.m_myLocations == null )
 		{
-			m_myLocations = new ArrayList<MyLocation>();
+			data.m_myLocations = new ArrayList<MyLocation>();
 		}
 		
 		MyLocation tmp = new MyLocation(name, newLocation);
-		m_myLocations.add(tmp);
-		m_hmpUIDtoLoc.put(tmp.getId(), m_myLocations.size()-1);
-		m_locationXmlHelper.saveDataToXml(m_myLocations);
+		data.m_myLocations.add(tmp);
+		m_hmpUIDtoLoc.put(tmp.getId(), data.m_myLocations.size()-1);
+		m_XmlHelper.saveDataToXml(data);
 		updateListView();
 			
 		// notify LocationManager --> new location added
 		registerLocation(tmp);
 	}
 	
+	// when detail activity gets finished
 	private void activityDetailReturned(int id, String oldName, String newName, int showMessage, String message, int mute)
 	{
 		// if ArrayList is null, create it
-		if ( m_myLocations == null )
+		if ( data.m_myLocations == null )
 		{
-			m_myLocations = new ArrayList<MyLocation>();
+			data.m_myLocations = new ArrayList<MyLocation>();
 		}
 		
-		// check if new name already exists
-		/*if ( newName.equals(oldName) )
-		{
-			// do nothing
-		}*/
-		// check if any item got the same name already
-		/*else if ( m_hmpLocationToId.containsKey(newName) && (m_hmpLocationToId.get(newName) != id) )
-		{
-			Toast.makeText(m_context, getString(R.string.itemAlreadyExists), Toast.LENGTH_SHORT).show();
-		}*/
 		// change items name
-		m_myLocations.get(id).setName(newName);
-		m_myLocations.get(id).setShowMessage(showMessage);
-		m_myLocations.get(id).setMessage(message);
-		m_myLocations.get(id).setMute(mute);
-		m_locationXmlHelper.saveDataToXml(m_myLocations);
+		data.m_myLocations.get(id).setName(newName);
+		data.m_myLocations.get(id).setShowMessage(showMessage);
+		data.m_myLocations.get(id).setMessage(message);
+		data.m_myLocations.get(id).setMute(mute);
+		m_XmlHelper.saveDataToXml(data);
 		updateListView();
+	}
+	
+	// when preferences activity gets finished
+	private void activityPreferencesReturned(int minTimeBetweenUpdate, int minDistancechangeForUpdate, int proxAlertRadius)
+	{
+		if ( data == null )
+		{
+			data = new XmlDataContainer();
+		}
+		
+		// change preferences
+		data.minTimeBetweenUpdate = minTimeBetweenUpdate;
+		data.minDistancechangeForUpdate = minDistancechangeForUpdate;
+		data.proxAlertRadius = proxAlertRadius;
+		m_XmlHelper.saveDataToXml(data);
 	}
 	
 	/**

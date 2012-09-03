@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+// Adapter class for listView
 public class LocationAdapter extends ArrayAdapter<MyLocation>
 {
 	private Activity activity; 
@@ -53,8 +54,8 @@ public class LocationAdapter extends ArrayAdapter<MyLocation>
         // to the view objects
         MyLocation currentLocation = data.get(position);
         locationView.name.setText(currentLocation.getName());
-        locationView.detail.setText( String.valueOf(currentLocation.getLocation().getLongitude()) + " " +
-        								String.valueOf(currentLocation.getLocation().getLatitude()) );
+        locationView.detail.setText( "Längengrad: " + String.valueOf(currentLocation.getLocation().getLongitude()) + "\n" +
+        								"Breitengrad: " + String.valueOf(currentLocation.getLocation().getLatitude()) );
         
         return rowView;
     }
